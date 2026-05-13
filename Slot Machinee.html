@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Slot - Global Background</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root { 
+            --gold: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --default-bg: radial-gradient(circle, #220000 0%, #000000 100%);
+        }
+        
+        * { box-sizing: border-box; }
+
+        body { 
+            margin: 0; 
+            background: var(--default-bg); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: gold;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; font-family: 'Times New Roman', serif; overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        /* 3 NUQTA MENYU */
+        .menu-fixed-wrapper { position: fixed; top: 10px; right: 15px; z-index: 9999; }
+        .three-dots { cursor: pointer; font-size: 35px; background: none; border: none; color: gold; text-shadow: 0 0 10px gold; }
+        
+        .settings-board {
+            display: none; position: absolute; top: 50px; right: 0;
+            background: rgba(10,10,10,0.95); border: 2px solid #bf953f;
+            padding: 12px; border-radius: 10px; min-width: 200px;
+            box-shadow: -5px 5px 30px #000;
+        }
+        .board-btn {
+            display: block; width: 100%; margin-bottom: 8px; background: var(--gold);
+            border: none; padding: 7px; font-size: 11px; font-weight: bold;
+            border-radius: 4px; cursor: pointer; color: #000; text-transform: uppercase;
+        }
+        .btn-reset { background: linear-gradient(to bottom, #ff4b2b, #ff416c); color: white; margin-top: 5px; }
+
+        /* MASSHAB */
+        .game-main-container {
+            display: flex; flex-direction: column; align-items: center;
+            transform: scale(0.75);
+        }
+
+        .royal-title h1 {
+            font-size: 45px; margin: 0 0 20px 0; background: var(--gold);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-transform: uppercase; letter-spacing: 5px;
+            filter: drop-shadow(0 0 15px rgba(184,134,11,0.6));
+        }
+
+        .machine-and-lever { display: flex; align-items: center; }
+
+        .main-frame {
+            background: #111; padding: 25px; border-radius: 25px;
+            border: 7px solid #bf953f; box-shadow: 0 0 40px rgba(184,134,11,0.5);
+            position: relative;
+        }
+
+        .slots-display {
+            display: flex; gap: 15px; background: #000; padding: 15px;
+            border-radius: 15px; border: 5px inset #b38728; background-size: cover;
+            background-position: center;
+        }
+
+        .slot-window {
+            width: 85px; height: 115px; background: #fff;
+            border-radius: 8px; overflow: hidden; display: flex;
+            align-items: center; justify-content: center;
+            box-shadow: inset 0 0 15px #000;
+        }
+        .slot-window img { width: 85%; height: 85%; object-fit: contain; }
+
+        /* DASTAK */
+        .lever-container { width: 55px; height: 180px; position: relative; cursor: pointer; }
+        .lever-base { width: 35px; height: 90px; background: #222; border-radius: 0 10px 10px 0; position: absolute; top: 45px; border-right: 3px solid #bf953f; }
+        .lever-arm { width: 14px; height: 110px; background: #444; position: absolute; left: 18px; top: -15px; border-radius: 10px; transform-origin: bottom center; transition: 0.3s; border: 1px solid gold; }
+        .lever-ball { width: 42px; height: 42px; background: radial-gradient(circle, #ff0000, #400); border-radius: 50%; position: absolute; top: -40px; left: -14px; border: 2px solid #fcf6ba; }
+        .lever-pull { transform: rotateX(55deg) scaleY(0.4); }
+
+        .spinning { animation: sRoll 0.2s infinite; }
+        @keyframes sRoll { 0%, 100% { transform: translateY(0); filter: blur(1px); } 50% { transform: translateY(6px); filter: blur(3px); } }
+
+        .signature { margin-top: 15px; font-weight: bold; text-shadow: 0 0 5px gold; font-size: 14px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="menu-fixed-wrapper">
+        <button class="three-dots" onclick="toggleMenu()">⋮</button>
+        <div id="settingsBoard" class="settings-board">
+                          <div class="signature">♣  Yusufaliyev ♠</div>
+            <button class="board-btn" onclick="document.getElementById('f1').click()">🎰 Rasmlar</button>
+            <button class="board-btn" onclick="document.getElementById('f2').click()">🖼️ Ichki fon</button>
+            <button class="board-btn" onclick="document.getElementById('f_ext').click()">🌍 Tashqi fon</button>
+            <button class="board-btn" onclick="document.getElementById('f3').click()">🔉 Aylanish ovozi</button>
+            <button class="board-btn" onclick="document.getElementById('f4').click()">🎉 Yutuq ovozi</button>
+            <button class="board-btn" onclick="document.getElementById('f5').click()">🎶 Fon musiqasi</button>
+            <button id="mBtn" class="board-btn" onclick="toggleMsc()" style="background:#2ecc71; color:black;">Musiqani yoqish</button>
+            <hr style="border: 0.5px solid #444;">
+            <button class="board-btn btn-reset" onclick="resetAll()">🔄 SBROS</button>
+        </div>
+    </div>
+
+    <div class="game-main-container">
+        <div class="royal-title"><h1>Slot Machine</h1></div>
+
+        <div class="machine-and-lever">
+            <div class="main-frame">
+                <div id="slotsBox" class="slots-display">
+                    <div class="slot-window"><img id="s1" src=""></div>
+                    <div class="slot-window"><img id="s2" src=""></div>
+                    <div class="slot-window"><img id="s3" src=""></div>
+                </div>
+                <div class="signature">♣  Yusufaliyev ♠</div>
+            </div>
+            <div class="lever-container" onclick="pullLever()">
+                <div class="lever-base"></div>
+                <div id="lever" class="lever-arm"><div class="lever-ball"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="f1" multiple style="display:none">
+    <input type="file" id="f2" style="display:none">
+    <input type="file" id="f_ext" style="display:none">
+    <input type="file" id="f3" style="display:none">
+    <input type="file" id="f4" style="display:none">
+    <input type="file" id="f5" style="display:none">
+
+    <audio id="spinSnd"></audio>
+    <audio id="winSnd"></audio>
+    <audio id="bgMsc" loop></audio>
+
+<script>
+        // Parol tizimi
+const PASSWORD = "123"; // Shu
+let access = sessionStorage.getItem('access_granted');
+
+if (access !== 'true') {
+    let userPass = prompt("Ilovaga kirish uchun parolni kiriting:");
+    if (userPass === PASSWORD) {
+        sessionStorage.setItem('access_granted', 'true');
+        alert("Xush kelibsiz!");
+    } else {
+        alert("Parol noto'g'ri! Kirish taqiqlandi.");
+        document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20%'>Kirish taqiqlangan!</h1>";
+        throw new Error("Wrong Password"); // Kodni to'xtatadi
+    }
+}
+
+        // FIREBASE SOZLAMALARI (Rasmda ko'ringan ma'lumotlar)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAcHL_lCA4kYWDxKW1uAia3Nm5Kgb3pdwM",
+        authDomain: "yusufaliyev-db792.firebaseapp.com",
+        databaseURL: "https://yusufaliyev-db792-default-rtdb.firebaseio.com",
+        projectId: "yusufaliyev-db792",
+        storageBucket: "yusufaliyev-db792.appspot.com",
+        appId: "1:530423783273:web:c4a7abf09d8bc40e55a7f8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let myImgs = [], canSpin = true;
+    const spinSnd = document.getElementById('spinSnd');
+    const winSnd = document.getElementById('winSnd');
+    const bgMsc = document.getElementById('bgMsc');
+       // MUSIQANI AVTOMATIK ISHGA TUSHIRISH
+    function initAudio() {
+        if(!audioInitialized && bgMsc.src) {
+            bgMsc.play().catch(e => console.log("Kutilyapti..."));
+            audioInitialized = true;
+        }
+    }
+
+    function toggleMute() {
+        if(bgMsc.paused) {
+            bgMsc.play();
+            document.getElementById('volBtn').innerText = "🔊";
+        } else {
+            bgMsc.pause();
+            document.getElementById('volBtn').innerText = "🔇";
+        }
+    }
+
+    function changeVolume(val) {
+        bgMsc.volume = val;
+        spinSnd.volume = val;
+        winSnd.volume = val;
+        if(val == 0) document.getElementById('volBtn').innerText = "🔇";
+        else document.getElementById('volBtn').innerText = "🔊";
+    }
+
+
+    function toggleMenu() {
+        const b = document.getElementById('settingsBoard');
+        b.style.display = b.style.display === 'block' ? 'none' : 'block';
+    }
+
+    db.ref('slot_v9').on('value', s => {
+        const d = s.val();
+        if(d){
+            if(d.imgs) { myImgs = d.imgs; document.querySelectorAll('.slot-window img').forEach(i => i.src = myImgs[0]); }
+            else { document.querySelectorAll('.slot-window img').forEach(i => i.src = ""); myImgs = []; }
+            
+            document.getElementById('slotsBox').style.backgroundImage = d.innerBg ? `url(${d.innerBg})` : 'none';
+            if(d.extBg) document.body.style.backgroundImage = `url(${d.extBg})`;
+            
+            spinSnd.src = d.spinS || "";
+            winSnd.src = d.winS || "";
+            
+            // Faqat manba o'zgarsa audio src yangilanadi
+            if(d.bgM && bgMsc.src !== d.bgM) {
+                bgMsc.src = d.bgM;
+            }
+        }
+    });
+
+    function resetAll() {
+        if(confirm("Barcha ma'lumotlarni o'chirilsinmi?")) {
+            db.ref('slot_v9').remove().then(() => location.reload());
+        }
+    }
+
+    function up(file, key) {
+        const r = new FileReader();
+        r.onload = e => db.ref('slot_v9/'+key).set(e.target.result);
+        r.readAsDataURL(file);
+    }
+
+    document.getElementById('f1').onchange = e => {
+        const urls = [];
+        const files = Array.from(e.target.files);
+        files.forEach(f => {
+            const r = new FileReader();
+            r.onload = ev => { urls.push(ev.target.result); if(urls.length===files.length) db.ref('slot_v9/imgs').set(urls); };
+            r.readAsDataURL(f);
+        });
+    };
+    document.getElementById('f2').onchange = e => up(e.target.files[0], 'innerBg');
+    document.getElementById('f_ext').onchange = e => up(e.target.files[0], 'extBg');
+    document.getElementById('f3').onchange = e => up(e.target.files[0], 'spinS');
+    document.getElementById('f4').onchange = e => up(e.target.files[0], 'winS');
+    document.getElementById('f5').onchange = e => up(e.target.files[0], 'bgM');
+
+    function toggleMsc() {
+        if(!bgMsc.src || bgMsc.src === window.location.href) {
+            alert("Oldin musiqa yuklang!");
+            return;
+        }
+        if(bgMsc.paused) {
+            bgMsc.play().catch(e => alert("Xato: Musiqa fayli noto'g'ri yoki yuklanmagan."));
+            document.getElementById('mBtn').innerText="Musiqani o'chirish";
+            document.getElementById('mBtn').style.background = "#e74c3c";
+        } else {
+            bgMsc.pause();
+            document.getElementById('mBtn').innerText="Musiqani yoqish";
+            document.getElementById('mBtn').style.background = "#2ecc71";
+        }
+    }
+
+    function pullLever() {
+        if(!canSpin || myImgs.length === 0) return;
+        canSpin = false;
+        document.getElementById('lever').classList.add('lever-pull');
+        setTimeout(() => document.getElementById('lever').classList.remove('lever-pull'), 400);
+
+        const slots = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+        slots.forEach(s => s.classList.add('spinning'));
+
+        let count = 0;
+        const timer = setInterval(() => {
+            slots.forEach(s => s.src = myImgs[Math.floor(Math.random() * myImgs.length)]);
+            if(spinSnd.src) {
+                let snap = spinSnd.cloneNode();
+                snap.volume = 0.5;
+                snap.play();
+            }
+            count++;
+
+            if(count > 12) {
+                clearInterval(timer);
+                slots.forEach(s => s.classList.remove('spinning'));
+                if(Math.random() < 0.4) {
+                    const w = myImgs[Math.floor(Math.random() * myImgs.length)];
+                    slots.forEach(s => s.src = w);
+                }
+                canSpin = true;
+                if(slots[0].src === slots[1].src && slots[1].src === slots[2].src) {
+                    if(winSnd.src) winSnd.play();
+                    setTimeout(() => alert("G'ALABA!"), 200);
+                }
+            }
+        }, 200);
+    }
+</script>
+</body>
+</html>
